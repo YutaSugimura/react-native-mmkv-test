@@ -8,108 +8,156 @@
  * @format
  */
 
-import React from 'react';
+import React, {useState} from 'react';
 import {
+  Button,
   SafeAreaView,
   ScrollView,
   StatusBar,
   StyleSheet,
   Text,
+  TextInput,
   useColorScheme,
   View,
 } from 'react-native';
-
+import {MMKV} from 'react-native-mmkv';
 import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+  clearStorage,
+  deleteStorage,
+  getAllKeys,
+  getStringStorage,
+  setStorage,
+} from './src/storage/common';
 
-const Section: React.FC<{
-  title: string;
-}> = ({children, title}) => {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-};
+export const storage = new MMKV();
 
-const App = () => {
+const App: React.FC = () => {
   const isDarkMode = useColorScheme() === 'dark';
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+  const [key, setKey] = useState<string>('');
+  const [value, setValue] = useState<string>('');
+
+  const [readKey, setReadKey] = useState<string>('');
+  const [readValue, setReadValue] = useState<string>('');
+
+  const [allKeys, setAllKeys] = useState<string[]>([]);
+  const [deleteTargetKey, setDeleteTargetKey] = useState<string>('');
+
+  const set = () => {
+    setStorage(storage, key, value);
+
+    setKey('');
+    setValue('');
+  };
+
+  const get = () => {
+    const result = getStringStorage(storage, readKey);
+    if (result) {
+      setReadValue(result);
+      setReadKey('');
+    }
+  };
+
+  const getKeys = () => {
+    const result = getAllKeys(storage);
+    setAllKeys(result);
+  };
+
+  const deleteStore = () => {
+    deleteStorage(storage, deleteTargetKey);
+    getKeys();
+  };
+
+  const allClear = () => {
+    clearStorage(storage);
+    getKeys();
   };
 
   return (
-    <SafeAreaView style={backgroundStyle}>
+    <SafeAreaView style={styles.flex1}>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
+
       <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
+        style={styles.flex1}
+        contentInsetAdjustmentBehavior="automatic">
+        <View style={styles.container}>
+          <Text>Set</Text>
+
+          <TextInput
+            style={styles.textInput}
+            placeholder="storage key"
+            value={key}
+            onChangeText={setKey}
+          />
+
+          <TextInput
+            style={styles.textInput}
+            placeholder="Enter data to be saved"
+            value={value}
+            onChangeText={setValue}
+          />
+          <Button title="Set VALUE" onPress={set} />
+        </View>
+
+        <View style={styles.container}>
+          <Text>Get</Text>
+
+          <TextInput
+            style={styles.textInput}
+            placeholder="storage key"
+            value={readKey}
+            onChangeText={setReadKey}
+          />
+
+          <Button title="Get VALUE" onPress={get} />
+          <Text>Value:{readValue}</Text>
+        </View>
+
+        <View style={styles.container}>
+          <Text>Get All Keys</Text>
+          <Button title="GET" onPress={getKeys} />
+          <Text>Keys: {JSON.stringify(allKeys)}</Text>
+        </View>
+
+        <View style={styles.container}>
+          <Text>Delete</Text>
+
+          <TextInput
+            style={styles.textInput}
+            placeholder="delete key"
+            value={deleteTargetKey}
+            onChangeText={setDeleteTargetKey}
+          />
+          <Button title="DELETE" onPress={deleteStore} />
+        </View>
+
+        <View style={styles.container}>
+          <Button title="CLEAR STORAGE" onPress={allClear} />
         </View>
       </ScrollView>
     </SafeAreaView>
   );
 };
 
+export default App;
+
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
+  flex1: {
+    flex: 1,
   },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
+  container: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop: 20,
   },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
+  textInput: {
+    height: 40,
+    width: 350,
+    paddingLeft: 10,
+    paddingRight: 10,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 6,
+    marginTop: 10,
   },
 });
-
-export default App;

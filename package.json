@@ -1,6 +1,6 @@
 {
   "name": "storagetestapp",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "android": "react-native run-android",
@@ -11,7 +11,8 @@
   },
   "dependencies": {
     "react": "17.0.2",
-    "react-native": "0.67.3"
+    "react-native": "0.67.3",
+    "react-native-mmkv": "^2.3.3"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9",
